@@ -14,46 +14,41 @@ export default function Home() {
 		}),
 	});
 
-	const handleButtonClick = async () => {
-		if (isConnected) {
-			const response = await fetch("/api/verbwire", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					walletAddress: address,
-					contractAddress:
-						"0x791b1e3BA2088eCce017d1c60934804868691f67",
-					chain: "goerli",
-				}),
-			});
-			const data = await response.json();
-			console.log("Check: ", data["isWalletHolderOfToken"]);
-			if (data["isWalletHolderOfToken"] === true) {
-				alert(
-					"Ownership verified for the given token. Holdings count: " +
-						data["holdingsCount"]
-				);
-			} else {
-				alert("Wallet does not hold the asset.");
-			}
-		} else {
-			connect();
-		}
+	const { disconnect } = useDisconnect();
+
+	const handleButtonClick = () => {
+		isConnected ? disconnect() : connect();
 	};
 
 	return (
-		<div className="container mx-auto p-8 min-h-screen min-w-screen flex flex-col items-center justify-center">
-			<div className="mt-6 text-center">
+		<div className="container mx-auto p-6 md:p-8 min-h-screen min-w-screen flex flex-col items-center justify-between">
+			<nav className="flex w-full justify-between items-center">
+				<div>
+					<h1 className="font-semibold font-mono text-xl">Plagia</h1>
+				</div>
 				<button
 					onClick={handleButtonClick}
-					className="px-4 py-2 rounded-md text-white"
-					style={{ backgroundColor: isConnected ? "gray" : "blue" }}
+					className="px-4 py-2 rounded-[3rem] text-sm text-white"
+					style={{
+						backgroundColor: isConnected ? "gray" : "blue",
+					}}
 				>
-					{isConnected ? "Appropriate_Button_Text" : "Connect Wallet"}
+					{isConnected ? "Disconnect" : "Connect"}
 				</button>
-			</div>
+			</nav>
+			<section>
+				<input
+					type="text"
+					placeholder="Insert the link to the project"
+					className="px-4 py-2 rounded-[3rem] w-full"
+				/>
+				{isConnected && (
+					<p className="text-center">Wallet connected: {address}</p>
+				)}
+			</section>
+			<footer className="mt-6 text-center">
+				<p className="text-sm text-gray-400">© By Rava</p>
+			</footer>
 		</div>
 	);
 }
