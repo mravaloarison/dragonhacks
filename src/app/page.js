@@ -24,8 +24,14 @@ export default function Home() {
 		}),
 	});
 
+	const [isAppFound, setIsAppFound] = useState(false);
+	const [Title, setTitle] = useState("");
+	const [Description, setDescription] = useState("");
+
 	const [AnalyzeText, setAnalyzeText] = useState("Analyze");
 	const [isLoading, setIsLoading] = useState(false);
+
+	const [urlEntered, setUrlEntered] = useState("");
 
 	const { disconnect } = useDisconnect();
 
@@ -33,12 +39,37 @@ export default function Home() {
 		isConnected ? disconnect() : connect();
 	};
 
+	const handleUrlChange = (e) => {
+		setUrlEntered(e.target.value);
+	};
+
 	const handleAnalyzeBtn = () => {
 		setAnalyzeText(<Loader className="h-4 w-4 animate-spin" />);
+
+		fetch("http://127.0.0.1:5000/flask_api/summarize", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				url: urlEntered,
+			}),
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				setAnalyzeText("Analyze");
+				setIsAppFound(true);
+				setTitle(data.title);
+				setDescription(data.description);
+			})
+			.catch((error) => {
+				console.error("Error:", error);
+				setAnalyzeText("Analyze");
+			});
 	};
 
 	return (
-		<div className="container mx-auto p-6 md:p-8 min-h-screen min-w-screen flex flex-col items-center justify-between">
+		<div className="container mx-auto p-6 md:p-8 min-h-screen min-w-screen flex flex-col gap-6 items-center justify-between">
 			<nav className="flex w-full justify-between items-center">
 				<div>
 					<h1 className="font-semibold text-xl">Plagia</h1>
@@ -47,53 +78,42 @@ export default function Home() {
 					{isConnected ? "Disconnect" : "Connect"}
 				</Button>
 			</nav>
-			<section className="w-[60%] flex flex-col gap-6">
-				<div className="flex gap-4">
-					<Input placeholder="Insert the link to the project" />
+			<section className="md:w-[60%] w-full flex flex-col gap-6">
+				<div className="flex flex-col md:flex-row gap-4 md:gap-6">
+					<Input
+						placeholder="Insert the link to the project"
+						value={urlEntered}
+						onChange={handleUrlChange}
+					/>
 					<Button variant="" onClick={handleAnalyzeBtn}>
 						{AnalyzeText}
 					</Button>
 				</div>
-				<Alert>
-					<Terminal className="w-6 h-6" />
-					<AlertTitle>Plagia</AlertTitle>
-					<AlertDescription>
-						This project is a plagiarism detector that compares your
-						project with others to check if there are any
-						similarities.
-					</AlertDescription>
-				</Alert>
-				<div className="grid grid-cols-2 gap-6">
-					<Card className="h-64 flex flex-col justify-between">
-						<CardHeader>
-							<p className="text-red-500">90% (HackPSU2024)</p>
-							<CardTitle>Plagiarism</CardTitle>
-							<CardDescription>
-								An app that detects plagiarsim in projects
-							</CardDescription>
-						</CardHeader>
-						<CardFooter>
-							<Button variant="secondary" className="w-full">
-								View Comparison
-							</Button>
-						</CardFooter>
-					</Card>
-
-					<Card className="h-64 flex flex-col justify-between">
-						<CardHeader>
-							<p className="text-yellow-400">85% (HackHarvard)</p>
-							<CardTitle>Another Project</CardTitle>
-							<CardDescription>
-								Another description for the project, maybe
-								longer than the first one just to see the gap
-							</CardDescription>
-						</CardHeader>
-						<CardFooter>
-							<Button variant="secondary" className="w-full">
-								View Comparison
-							</Button>
-						</CardFooter>
-					</Card>
+				{isAppFound && (
+					<Alert>
+						<AlertTitle>{Title}</AlertTitle>
+						<AlertDescription>{Description}</AlertDescription>
+					</Alert>
+				)}
+				<div className="md:grid md:grid-cols-2 flex flex-col gap-6">
+					{isAppFound && (
+						<Card className="md:h-64 flex flex-col justify-between">
+							<CardHeader>
+								<p className="text-red-400 font-semibold">
+									90% (HackPSU2024)
+								</p>
+								<CardTitle>Plagiarism</CardTitle>
+								<CardDescription>
+									An app that detects plagiarsim in projects
+								</CardDescription>
+							</CardHeader>
+							<CardFooter>
+								<Button variant="secondary" className="w-full">
+									View Comparison
+								</Button>
+							</CardFooter>
+						</Card>
+					)}
 				</div>
 			</section>
 			<footer className="mt-6 text-center">
