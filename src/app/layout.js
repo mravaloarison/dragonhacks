@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-	title: "Link Owner",
+	title: "Plagia",
 	description:
 		"Take ownership of a project and leverage verbwire api to get the link metadata.",
 };

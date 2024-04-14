@@ -23,6 +23,7 @@ def hello_world():
     comparisons = []
 
     for project in project_gallery(hackathon_url):
+        print("Comparing with project", project)
         try:
             if not project == 0:
                 comaprison_record = compare(url, project)

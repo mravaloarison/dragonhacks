@@ -51,16 +51,40 @@ export default function Home() {
 		setHackathonEntered(e.target.value);
 	};
 
-	const AlertingMsg = (msg) => {
+	const ErrorMsg = (msg) => {
 		toast.error("Oops", {
 			description: msg,
 			type: "error",
 		});
 	};
 
+	const NotifMsg = (msg) => {
+		toast("😊", {
+			description: msg,
+		});
+	};
+
+	const WarnindMsg = (msg) => {
+		toast.warning("Warning", {
+			description: msg,
+		});
+	};
+
+	const handleOwnerShip = () => {
+		if (urlEntered === "" || hackathonEntered === "") {
+			ErrorMsg("One of the URL is missing");
+			return;
+		}
+
+		if (!isConnected) {
+			WarnindMsg("Connect your wallet first");
+			return;
+		}
+	};
+
 	const handleAnalyzeBtn = () => {
 		if (urlEntered === "" || hackathonEntered === "") {
-			AlertingMsg("One of the URL is missing");
+			ErrorMsg("One of the URL is missing");
 			return;
 		}
 
@@ -68,7 +92,7 @@ export default function Home() {
 		setAnalyzeText(
 			<div className="flex gap-2 items-center">
 				<Loader className="h-4 w-4 mr-2 animate-spin" />
-				<p>Loading ...</p>
+				<p>Loading</p>
 			</div>
 		);
 
@@ -128,12 +152,19 @@ export default function Home() {
 							onChange={handleHackathonChange}
 						/>
 					</div>
-					<div className="flex items-center justify-center">
+					<div className="flex items-center justify-center gap-6">
 						<Button
 							onClick={handleAnalyzeBtn}
-							className="md:w-fit w-full"
+							className="md:w-fit w-full md:px-16"
 						>
 							{AnalyzeText}
+						</Button>
+						<Button
+							className="md:w-fit w-full md:px-16"
+							variant="secondary"
+							onClick={handleOwnerShip}
+						>
+							Own it!
 						</Button>
 					</div>
 				</section>
@@ -142,17 +173,23 @@ export default function Home() {
 						<Skeleton className="h-4 w-[150px]" />
 						<Skeleton className="h-4 w-full" />
 						<Skeleton className="h-4 w-full" />
-						<Skeleton className="h-4 w-[200px]" />
+						<Skeleton className="h-4 md:w-[700px] w-[200px]" />
 					</Alert>
 				)}
 				{isAppFound && !isLoading && (
-					<Alert>
-						<AlertTitle>{Title}</AlertTitle>
+					<Alert className="border-blue-400">
+						<AlertTitle className="text-blue-700 ">
+							{Title}
+						</AlertTitle>
 						<AlertDescription>{Description}</AlertDescription>
 					</Alert>
 				)}
+				{isLoading && (
+					<div className="w-full h-20 flex justify-center items-center">
+						<Loader className="h-6 w-6 animate-spin" />
+					</div>
+				)}
 				<div className="md:grid md:grid-cols-2 flex flex-col gap-6">
-					{isLoading && <Loader className="h-6 w-6 animate-spin" />}
 					{isAppFound && !isLoading && (
 						<>
 							{Comparisons.length > 0 &&
@@ -165,7 +202,7 @@ export default function Home() {
 											<CardTitle>
 												{comparison.title}
 											</CardTitle>
-											<CardDescription className="md:overflow-scroll md:max-h-20">
+											<CardDescription className="md:overflow-scroll md:max-h-[6.9rem]">
 												{comparison.explanation}
 											</CardDescription>
 										</CardHeader>
